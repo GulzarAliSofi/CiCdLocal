@@ -28,11 +28,20 @@ pipeline {
                 }
             }
         }
-        // stage('Run API') {
-        //     steps {
-        //         bat 'dotnet run --project %WORKSPACE%\\src\\CiCdLocal\\CiCdLocal.csproj --no-build --configuration Release'
-        //     }
-        // }
+        stage('Deliver') {
+            steps {
+                bat 'dotnet publish %WORKSPACE%\\src\\CiCdLocal\\CiCdLocal.csproj --no-build --no-restore --configuration Release -o published'
+                echo "Validating published artifacts..."
+                bat 'dir %WORKSPACE%\\published'
+                echo "Verifying main executable exists..."
+                bat 'if exist %WORKSPACE%\\published\\CiCdLocal.exe (echo API executable found!) else (exit /b 1)'
+            }
+            post{
+                success {
+                    archiveArtifacts artifacts: 'src/CiCdLocal/published/**/*', allowEmptyArchive: true
+                }
+            }
+        }
     }
     post {
         always {
