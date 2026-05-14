@@ -1,21 +1,30 @@
 pipeline {
     agent any
     stages {
-        stage('Build') { 
+        stage('Restore') {
             steps {
-                bat 'dotnet restore' 
-                bat 'dotnet build --no-restore' 
+                bat 'dotnet restore CiCdLocal.sln'
             }
         }
-        stage('Test') { 
+        stage('Build') {
             steps {
-                bat 'dotnet test' // --no-build --no-restore --collect "XPlat Code Coverage"' 
+                bat 'dotnet build CiCdLocal.sln --no-restore'
             }
-            // post {
-            //     always {
-            //         recordCoverage(tools: [[parser: 'COBERTURA', pattern: '**/*.xml']], sourceDirectories: [[path: 'SimpleWebApi.Test/TestResults']])  
-            //     }
-            // }
         }
+        stage('Test') {
+            steps {
+                bat 'dotnet test tests/SimpleWebApi.Test/SimpleWebApi.Test.csproj --no-build --no-restore --collect "XPlat Code Coverage"'
+            }
+            post {
+                always {
+                    recordCoverage(tools: [[parser: 'COBERTURA', pattern: '**/coverage.cobertura.xml']])
+                }
+            }
+        }
+        // stage('Run API') {
+        //     steps {
+        //         bat 'dotnet run --project src/CiCdLocal/CiCdLocal.csproj --no-build --no-restore'
+        //     }
+        // }
     }
 }
