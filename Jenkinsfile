@@ -49,7 +49,7 @@ pipeline {
                 iisreset /stop
 
                 echo Creating destination folder if it does not exist...
-                if not exist "C:\inetpub\CiCdWebApi" mkdir "C:\inetpub\CiCdWebApi"
+                if not exist "C:\\inetpub\\CiCdWebApi" mkdir "C:\\inetpub\\CiCdWebApi"
 
                 echo Copying files...
                 xcopy /E /Y %WORKSPACE%\\published\\* C:\\inetpub\\CiCdWebApi\\
