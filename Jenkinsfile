@@ -48,6 +48,8 @@ pipeline {
                 echo Stopping IIS...
                 iisreset /stop
 
+                net stop w3svc
+
                 echo Creating destination folder if it does not exist...
                 if not exist "C:\\inetpub\\CiCdWebApi" mkdir "C:\\inetpub\\CiCdWebApi"
 
@@ -57,18 +59,13 @@ pipeline {
                     echo ERROR: Failed to copy files!
                     exit /b 1
                 )
-
+                net start w3svc
+                
                 echo Starting IIS...
                 iisreset /start
 
                 echo Validating Web API endpoint...
-                powershell -NoProfile -Command "try {
-                 $r = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:809/api/WeatherForecast' -TimeoutSec 15; 
-                 Write-Host 'Status Code:' $r.StatusCode
-                 if ($r.StatusCode -ne 200) { 
-                 throw \"Unexpected status code: $($r.StatusCode)\" }; 
-                 Write-Host 'API validation passed with status' $r.StatusCode } 
-                 catch { Write-Host 'API validation failed:' $_; exit 1 }"
+                powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:809/api/WeatherForecast' -TimeoutSec 15; Write-Host 'Status Code:' $r.StatusCode                    if ($r.StatusCode -ne 200) {                       throw \"Unexpected status code: $($r.StatusCode)\" };                        Write-Host 'API validation passed with status' $r.StatusCode                     }                     catch { Write-Host 'API validation failed:' $_; exit 1 }"
                 '''
             }
         }
