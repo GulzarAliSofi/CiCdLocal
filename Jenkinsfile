@@ -42,6 +42,23 @@ pipeline {
                 }
             }
         }
+         stage('Deploy to IIS') {
+            steps {
+                bat '''
+                echo Stopping IIS...
+                iisreset /stop
+
+                echo Copying files...
+                xcopy /E /Y %WORKSPACE%\\published\\* C:\\inetpub\\DemoMvcApp\\
+
+                echo Starting IIS...
+                iisreset /start
+
+                echo Validating Web API endpoint...
+                powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost/api/WeatherForecast' -TimeoutSec 15; if ($r.StatusCode -ne 200) { throw \"Unexpected status code: $($r.StatusCode)\" }; Write-Host 'API validation passed with status' $r.StatusCode } catch { Write-Host 'API validation failed:' $_; exit 1 }"
+                '''
+            }
+        }
     }
     post {
         always {
