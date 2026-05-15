@@ -51,14 +51,11 @@ pipeline {
                 net stop w3svc
 
                 echo Creating destination folder if it does not exist...
-                if not exist "C:\\inetpub\\CiCdWebApi" mkdir "C:\\inetpub\\CiCdWebApi"
+                if not exist "C:\\wwwroot\\CiCdWebApi" mkdir "C:\\wwwroot\\CiCdWebApi"
 
-                echo Copying files...
-                xcopy /E /Y %WORKSPACE%\\published\\* C:\\inetpub\\CiCdWebApi\\
-                if errorlevel 1 (
-                    echo ERROR: Failed to copy files!
-                    exit /b 1
-                )
+                echo Copying published files to wwwroot using PowerShell...
+                powershell -NoProfile -Command "try { Copy-Item -Path '%WORKSPACE%\\published\\*' -Destination 'C:\\wwwroot\\CiCdWebApi' -Force -Recurse; Write-Host 'Files copied successfully'; (Get-ChildItem -Path 'C:\\wwwroot\\CiCdWebApi' -Force | Measure-Object).Count | ForEach-Object { Write-Host 'Total files deployed:' $_ } } catch { Write-Host 'Copy failed:' $_; exit 1 }"
+
                 net start w3svc
                 
                 echo Starting IIS...
