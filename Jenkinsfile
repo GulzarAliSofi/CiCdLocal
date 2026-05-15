@@ -49,7 +49,7 @@ pipeline {
                 iisreset /stop
 
                 echo Copying files...
-                xcopy /E /Y %WORKSPACE%\\published\\* C:\\inetpub\\DemoMvcApp\\
+                xcopy /E /Y %WORKSPACE%\\published\\* C:\\inetpub\\CiCdWebApi\\
 
                 echo Starting IIS...
                 iisreset /start
