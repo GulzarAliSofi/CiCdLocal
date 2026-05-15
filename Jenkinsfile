@@ -48,8 +48,15 @@ pipeline {
                 echo Stopping IIS...
                 iisreset /stop
 
+                echo Creating destination folder if it does not exist...
+                if not exist "C:\inetpub\CiCdWebApi" mkdir "C:\inetpub\CiCdWebApi"
+
                 echo Copying files...
                 xcopy /E /Y %WORKSPACE%\\published\\* C:\\inetpub\\CiCdWebApi\\
+                if errorlevel 1 (
+                    echo ERROR: Failed to copy files!
+                    exit /b 1
+                )
 
                 echo Starting IIS...
                 iisreset /start
